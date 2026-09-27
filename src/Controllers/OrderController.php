@@ -80,13 +80,20 @@ class OrderController
     }
 
     /**
-     * ❌ METODO MAL APLICADO: report()
-     *    Usa banderas booleanas ilegibles (ver ReportGenerator).
+     * ✅ Resuelto en feat/patron-decorator (Ejercicio 4): en vez de banderas
+     *    booleanas ilegibles, se encadenan decoradores explicitos.
      */
     public function report(): void
     {
-        $generador = new ReportGenerator();
-        echo $generador->generate('Pedidos del dia', true, true, true);
+        $reporte = new WatermarkDecorator(
+            new PdfReportDecorator(
+                new DigitalSignatureDecorator(
+                    new BasicReport('Pedidos del dia')
+                )
+            )
+        );
+
+        echo $reporte->generate();
     }
 }
 
