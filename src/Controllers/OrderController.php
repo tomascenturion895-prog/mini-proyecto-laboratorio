@@ -10,7 +10,8 @@
  *     2. Contiene reglas de negocio (descuentos).
  *     3. Imprime HTML con echo.
  *     4. Crea con new todas sus dependencias concretas.
- *     5. Repite por TERCERA vez el if de notificaciones.
+ *     5. [Resuelto en feat/patron-factory] Repetia por TERCERA vez el if de
+ *        notificaciones; ahora usa NotificationFactory (Ejercicio 2).
  *
  *  Tener las carpetas /Controllers /Models /views NO significa aplicar MVC.
  *  MVC es separacion de responsabilidades, no estructura de directorios.
@@ -42,9 +43,8 @@ class OrderController
         $conexion = Connection::obtener();
         $conexion->ejecutar("INSERT INTO orders VALUES ({$id}, '{$paciente}', {$total})");
 
-        // ❌ 4. Notificacion resuelta otra vez con if (deberia ser Factory)
-        $notificador = new NotificationSender();
-        $notificador->enviar('email', 'paciente@mail.com', "Pedido {$id} creado");
+        // ✅ 4. Notificacion resuelta con Factory (Ejercicio 2, ya no hay if por tipo aca)
+        NotificationFactory::create('email', 'paciente@mail.com')->send("Pedido {$id} creado");
 
         // ❌ 5. HTML impreso desde el controlador (deberia ser una View)
         echo "<h1>Pedido creado</h1>";
