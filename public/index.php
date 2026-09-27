@@ -40,7 +40,11 @@ require_once __DIR__ . '/../src/Reports/BasicReport.php';
 require_once __DIR__ . '/../src/Reports/DigitalSignatureDecorator.php';
 require_once __DIR__ . '/../src/Reports/PdfReportDecorator.php';
 require_once __DIR__ . '/../src/Reports/WatermarkDecorator.php';
-require_once __DIR__ . '/../src/Events/OrderEvents.php';
+require_once __DIR__ . '/../src/Events/OrderObserver.php';
+require_once __DIR__ . '/../src/Events/EmailObserver.php';
+require_once __DIR__ . '/../src/Events/SmsObserver.php';
+require_once __DIR__ . '/../src/Events/DashboardObserver.php';
+require_once __DIR__ . '/../src/Events/OrderSubject.php';
 require_once __DIR__ . '/../src/Services/OrderService.php';
 require_once __DIR__ . '/../src/Controllers/OrderController.php';
 
