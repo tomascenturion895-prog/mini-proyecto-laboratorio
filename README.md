@@ -1,18 +1,15 @@
-# laboratorio-pedidos — proyecto de práctica
+# laboratorio-pedidos — TP Integrador (Unidades 1 y 2)
 
 Sistema de gestión de pedidos de un laboratorio de análisis clínicos.
 **PHP Vanilla, sin frameworks, sin Composer.** Corre en XAMPP tal cual está.
 
-> ⚠️ **Este proyecto está roto a propósito.**
-> Cada archivo contiene deuda técnica sembrada, marcada con comentarios:
->
-> ```php
-> // ❌ MAL APLICADO: qué método está mal y qué principio viola
-> // ✅ FORMA CORRECTA: qué patrón corresponde y cómo se estructura
-> ```
->
-> El objetivo no es que funcione mejor: ya funciona. El objetivo es que
-> **se pueda cambiar sin miedo**.
+> Este repositorio es un fork de [`mds2-utn-formosa/mini-proyecto-laboratorio`](https://github.com/mds2-utn-formosa/mini-proyecto-laboratorio),
+> el proyecto de la cátedra con deuda técnica sembrada a propósito.
+> Acá está **refactorizado**: se resolvieron los 8 ejercicios guiados del
+> [mapa de deudas original](docs/MAPA-DE-DEUDAS.md) aplicando un patrón de
+> diseño por rama. El detalle de qué deuda se encontró, qué patrón se
+> aplicó y qué consecuencia negativa tiene cada solución está en
+> **[`docs/DEUDA-TECNICA.md`](docs/DEUDA-TECNICA.md)**.
 
 ---
 
@@ -22,78 +19,88 @@ Sistema de gestión de pedidos de un laboratorio de análisis clínicos.
 2. Iniciar Apache desde el panel de XAMPP (MySQL **no** hace falta).
 3. Abrir: `http://localhost/mini-proyecto-laboratorio/public/index.php`
 
+También corre con el servidor embebido de PHP, sin XAMPP:
+
+```
+php -S localhost:8000 -t public
+```
+
 Acciones disponibles:
 
 | URL | Qué hace |
 |---|---|
-| `public/index.php?accion=crear` | Crea un pedido pasando por toda la deuda |
+| `public/index.php?accion=crear` | Crea un pedido (acepta `?id=&paciente=&monto=&tipo=`) y muestra el listado |
 | `public/index.php?accion=listar` | Lista pedidos desde la vista |
-| `public/index.php?accion=reporte` | Genera un reporte con banderas booleanas |
+| `public/index.php?accion=reporte` | Genera un reporte combinando decoradores |
 
-La persistencia está simulada en memoria para que el proyecto arranque sin
-configurar MySQL. Eso **no** es parte de la deuda a corregir.
+`tipo` acepta `particular`, `obra_social`, `jubilado` o `prepaga`.
 
----
+La persistencia sigue simulada en memoria para que el proyecto arranque sin
+configurar MySQL — eso **no** es parte de la deuda a corregir (ver
+`docs/MAPA-DE-DEUDAS.md` del proyecto original).
 
-## Mapa de deudas
-
-| Archivo | Síntoma sembrado | Patrón / principio | Ejercicio |
-|---|---|---|---|
-| `public/index.php` | Requires manuales, credenciales en el código, ruteo con `if` | Autoload + config externa + tabla de rutas | — |
-| `src/Database/Connection.php` | Una conexión nueva por consulta; excepción silenciada | **Singleton** | — |
-| `src/Notifications/NotificationSender.php` | `if` por tipo repetido en 3 archivos | **Factory** | Ej. 2 |
-| `src/Pricing/PriceCalculator.php` | `switch` con todos los algoritmos + lógica duplicada | **Strategy** | Ej. 1 |
-| `src/Events/OrderEvents.php` | Avisos encadenados a mano a clases concretas | **Observer** | Ej. 5 |
-| `src/Legacy/LegacyNotifier.php` | Clase de terceros modificada + copia y pega | **Adapter** | Ej. 3 |
-| `src/Reports/ReportGenerator.php` | Parámetros booleanos (`boolean trap`) | **Decorator** | Ej. 4 |
-| `src/Services/OrderService.php` | Método que hace de todo | **Facade** + SRP | Ej. 6 |
-| `src/Controllers/OrderController.php` | SQL + negocio + HTML en el controlador | **MVC** + SRP | Ej. 7 |
-| `src/Models/Order.php` | Modelo que se persiste y calcula precios | **Repository** + Strategy | — |
-| `views/orders.php` | Consulta, calcula y no escapa la salida | **MVC** | Ej. 8 |
+**Requisitos:** PHP 8.1 o superior (usa `match`, tipado de propiedades y
+constructor property promotion). No requiere ninguna extensión extra ni
+`composer install`: no hay dependencias de terceros.
 
 ---
 
-## La medida de la deuda de este proyecto
+## Qué se refactorizó
 
-El descuento de obra social (**0.7**) está escrito en **cinco archivos distintos**:
+Cada fila del mapa de deudas original se resolvió en su propia rama y su
+propio Pull Request:
 
-```
-src/Models/Order.php
-src/Pricing/PriceCalculator.php   (dos veces)
-src/Services/OrderService.php
-src/Controllers/OrderController.php
-views/orders.php
-```
+| Archivo | Patrón aplicado | Rama |
+|---|---|---|
+| `src/Pricing/` | Strategy (Ej. 1: `PrepaidStrategy`) | `feat/patron-strategy` |
+| `src/Notifications/` | Factory Method (Ej. 2: `WhatsAppNotification`) | `feat/patron-factory` |
+| `src/Legacy/LegacyNotifier.php` | Adapter (Ej. 3) | `feat/patron-adapter` |
+| `src/Reports/` | Decorator (Ej. 4: Pdf + Watermark) | `feat/patron-decorator` |
+| `src/Events/` | Observer (Ej. 5: `SmsObserver`) | `feat/patron-observer` |
+| `src/Services/OrderFacade.php` | Facade (Ej. 6) | `feat/patron-facade` |
+| `src/Controllers/OrderController.php` | MVC + SRP (Ej. 7) | `feat/patron-mvc-controller` |
+| `views/orders.php` | MVC (Ej. 8) | `feat/patron-mvc-vista` |
 
-Cuando el laboratorio lo cambie al 25%, ese número es exactamente
-cuántos lugares hay que tocar y cuántas oportunidades hay de olvidarse uno.
+El detalle de cada refactor (deuda encontrada con línea exacta, patrón
+elegido y por qué, y la consecuencia negativa de la propia solución) está
+documentado en el Pull Request de cada rama y consolidado en
+[`docs/DEUDA-TECNICA.md`](docs/DEUDA-TECNICA.md).
 
-**Ese es el punto de toda la unidad.**
+### Qué quedó pendiente (a propósito, fuera de alcance de esta entrega)
+
+- **`src/Models/Order.php`**: todavía persiste y calcula su propio precio
+  (`calcularTotal()`, código muerto que ya no llama nadie). Extraerlo a
+  `OrderRepository` + `PricingStrategy` no era uno de los 8 ejercicios
+  elegidos para esta entrega.
+- **`src/Database/Connection.php`**: sigue devolviendo una conexión nueva
+  en cada llamada (Singleton pendiente).
+- **`public/index.php`**: sigue con `require` manuales, credenciales
+  hardcodeadas y ruteo con `if` encadenados (autoload + config externa +
+  tabla de rutas, pendiente).
+
+Estos tres quedan identificados en `docs/DEUDA-TECNICA.md` para una
+próxima entrega.
 
 ---
 
-## Mecánica de la clase práctica
+## Flujo de trabajo de este repositorio
 
 ```
-1. Cada grupo toma UN archivo del mapa de deudas.       (5 min)
-2. Lee los comentarios ❌ y ✅.                          (5 min)
-3. Refactoriza en una rama propia: feat/patron-<nombre>  (20 min)
-4. Abre un Pull Request que responda tres cosas:
-     - qué deuda encontró (con la línea exacta)
-     - qué patrón aplicó y por qué ese y no otro
-     - qué consecuencia negativa tiene su propia solución
-5. Otro grupo revisa el PR y comenta.                    (10 min)
+main          ●──●──●──●──●──●──●──●──●
+               \  \  \  \  \  \  \  \  \
+                strategy factory adapter decorator observer facade mvc-controller mvc-vista
 ```
 
-El PR revisado por otro grupo es evidencia del TP Integrador.
+- Nadie escribe directamente en `main`: una rama por patrón, un Pull
+  Request por rama.
+- Convención de commits: `feat:`, `fix:`, `refactor:`, `docs:`.
+- Cada PR responde en su descripción: qué deuda se encontró (archivo y
+  línea), qué patrón se aplicó y por qué ese y no otro, y qué consecuencia
+  negativa tiene la propia solución.
 
 ---
 
-## Reglas del refactor
+## Créditos
 
-- **No se rompe funcionalidad.** Antes y después, la app hace lo mismo.
-- **Un patrón por rama.** Nada de una rama con seis cambios mezclados.
-- **Se borra el código viejo.** Dejar el método anterior "por las dudas" es
-  deuda nueva.
-- **Se documenta la consecuencia negativa.** Un patrón sin contras analizadas
-  es sobreingeniería esperando su turno.
+Proyecto base de la cátedra: **Metodología de Sistemas II — TUP — UTN FRRe
+(sede Formosa)**. Consigna completa en [`docs/CONSIGNA-TP.md`](docs/CONSIGNA-TP.md).
