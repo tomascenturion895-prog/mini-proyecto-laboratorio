@@ -48,12 +48,41 @@ class OrderController
             'paciente@mail.com'
         );
 
+        $pedidos   = $this->pedidosDeMuestra();
+        $pedidos[] = ['id' => $order->id, 'paciente' => $order->patient, 'total' => $order->amount];
+
         require __DIR__ . '/../../views/orders.php';
     }
 
     public function index(): void
     {
+        $pedidos = $this->pedidosDeMuestra();
+
         require __DIR__ . '/../../views/orders.php';
+    }
+
+    /**
+     * ✅ EJERCICIO 8 (TP) — resuelto (lado controlador): la vista ya no
+     *    consulta ni calcula (ver views/orders.php), asi que ese dato
+     *    tiene que llegar resuelto desde aca. Sigue siendo la misma
+     *    persistencia simulada en memoria de siempre (ver README), solo
+     *    que ahora el total se calcula con PricingStrategy en vez de un
+     *    0.7 hardcodeado en la vista.
+     */
+    private function pedidosDeMuestra(): array
+    {
+        return [
+            [
+                'id'       => 1,
+                'paciente' => 'Juan Perez',
+                'total'    => (new PriceCalculator(new InsuranceStrategy()))->calculate(15000),
+            ],
+            [
+                'id'       => 2,
+                'paciente' => 'Ana Gomez',
+                'total'    => (new PriceCalculator(new PrivatePatientStrategy()))->calculate(22000),
+            ],
+        ];
     }
 
     /**
