@@ -13,35 +13,98 @@ Sistema de gestión de pedidos de un laboratorio de análisis clínicos.
 
 ---
 
-## Cómo levantarlo
+## Instalación y puesta en marcha
 
-1. Copiar la carpeta dentro de `C:\xampp\htdocs\`.
-2. Iniciar Apache desde el panel de XAMPP (MySQL **no** hace falta).
-3. Abrir: `http://localhost/mini-proyecto-laboratorio/public/index.php`
+Guía completa para que cualquier otro grupo pueda clonar este repositorio y
+levantarlo sin tener que preguntar nada.
 
-También corre con el servidor embebido de PHP, sin XAMPP:
+### Requisitos previos
+
+- **PHP 8.1 o superior** (el código usa `match`, tipado de propiedades y
+  constructor property promotion). Verificar la versión instalada con:
+  ```
+  php -v
+  ```
+- **Git** para clonar el repositorio.
+- **No hace falta MySQL ni ningún motor de base de datos.** La persistencia
+  está simulada en memoria (ver `src/Database/Connection.php`) justamente
+  para que el proyecto arranque sin configurar nada — eso **no** es parte de
+  la deuda a corregir (ver `docs/MAPA-DE-DEUDAS.md` del proyecto original).
+- **No hace falta Composer ni `composer install`.** No hay dependencias de
+  terceros: todo el código es PHP vanilla con `require_once` manuales (ver
+  `public/index.php`).
+- No hace falta ninguna extensión de PHP extra a las que ya vienen
+  habilitadas por defecto.
+
+### 1. Clonar el repositorio
+
+```
+git clone https://github.com/tomascenturion895-prog/mini-proyecto-laboratorio.git
+cd mini-proyecto-laboratorio
+```
+
+### 2. Levantarlo (elegir una opción)
+
+#### Opción A — Servidor embebido de PHP (recomendada, no necesita instalar nada más)
+
+Desde la raíz del repositorio:
 
 ```
 php -S localhost:8000 -t public
 ```
 
-Acciones disponibles:
+Dejar la terminal abierta (ahí corre el servidor) y abrir en el navegador:
+
+```
+http://localhost:8000/index.php
+```
+
+Para cortar el servidor: `Ctrl + C` en esa misma terminal.
+
+#### Opción B — XAMPP
+
+1. Copiar (o clonar directamente) la carpeta `mini-proyecto-laboratorio`
+   dentro de `C:\xampp\htdocs\` (Windows) o `/opt/lampp/htdocs/` (Linux).
+2. Iniciar **Apache** desde el panel de control de XAMPP. **MySQL no hace
+   falta** iniciarlo — el proyecto no lo usa.
+3. Abrir en el navegador:
+   ```
+   http://localhost/mini-proyecto-laboratorio/public/index.php
+   ```
+
+### 3. Probar que funciona
+
+Acciones disponibles (agregar el parámetro `accion` a la URL de arriba):
 
 | URL | Qué hace |
 |---|---|
-| `public/index.php?accion=crear` | Crea un pedido (acepta `?id=&paciente=&monto=&tipo=`) y muestra el listado |
-| `public/index.php?accion=listar` | Lista pedidos desde la vista |
-| `public/index.php?accion=reporte` | Genera un reporte combinando decoradores |
+| `?accion=crear` | Crea un pedido (acepta `&id=&paciente=&monto=&tipo=`) y muestra el listado |
+| `?accion=listar` | Lista pedidos desde la vista |
+| `?accion=reporte` | Genera un reporte combinando decoradores |
 
 `tipo` acepta `particular`, `obra_social`, `jubilado` o `prepaga`.
 
-La persistencia sigue simulada en memoria para que el proyecto arranque sin
-configurar MySQL — eso **no** es parte de la deuda a corregir (ver
-`docs/MAPA-DE-DEUDAS.md` del proyecto original).
+Ejemplo completo (con el servidor embebido de la Opción A):
 
-**Requisitos:** PHP 8.1 o superior (usa `match`, tipado de propiedades y
-constructor property promotion). No requiere ninguna extensión extra ni
-`composer install`: no hay dependencias de terceros.
+```
+http://localhost:8000/index.php?accion=crear&id=1&paciente=Juan+Perez&monto=15000&tipo=obra_social
+```
+
+Si la página muestra una tabla con el pedido creado, quedó levantado
+correctamente.
+
+### Problemas comunes
+
+- **`php: command not found`**: PHP no está instalado o no está en el
+  `PATH`. Instalarlo (por ejemplo `sudo apt install php-cli` en Linux, o
+  descargarlo desde [windows.php.net](https://windows.php.net/download/) en
+  Windows) y volver a abrir la terminal.
+- **`Failed to listen on localhost:8000`**: el puerto ya está en uso.
+  Probar con otro puerto, por ejemplo `php -S localhost:8080 -t public` y
+  ajustar la URL.
+- **Página en blanco o error de `require`**: verificar que el comando
+  `php -S` se ejecutó desde la **raíz del repositorio** (con `-t public`),
+  no desde adentro de la carpeta `public/`.
 
 ---
 
